@@ -81,7 +81,7 @@ local Success, Response = pcall(function()
 end)
 
 if not Success then
-	-- иконки не загрузились, но это не критично
+	warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
 end	
 
 local function GetIcon(IconName)
@@ -637,7 +637,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	}), "Second")
 
 	local WindowName = AddThemeObject(SetProps(MakeElement("Label", WindowConfig.Name, 14), {
-		Size = UDim2.new(0, 280, 2, 0),  -- фиксированная ширина, не залезает на статы
+		Size = UDim2.new(1, -30, 2, 0),
 		Position = UDim2.new(0, 25, 0, -24),
 		Font = Enum.Font.GothamBlack,
 		TextSize = 20
@@ -652,9 +652,6 @@ function OrionLib:MakeWindow(WindowConfig)
 	-- ИЗМЕНЕНО: Создаём лейблы для FPS / Ping / Exploit
 	-- Позиционируются справа в TopBar, левее кнопок
 	-- ══════════════════════════════════════════
-	-- ══════════════════════════════════════════
-	-- ИЗМЕНЕНО: FPS/Ping/Exploit — сдвинуто правее, не перекрывает название
-	-- ══════════════════════════════════════════
 	local FPSLabel = Create("TextLabel", {
 		Text = "FPS: --",
 		TextColor3 = Color3.fromRGB(180, 255, 180),  -- зелёный
@@ -662,9 +659,9 @@ function OrionLib:MakeWindow(WindowConfig)
 		TextSize = 11,
 		Font = Enum.Font.GothamBold,
 		BackgroundTransparency = 1,
-		TextXAlignment = Enum.TextXAlignment.Left,
+		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 60, 0, 14),
-		Position = UDim2.new(1, -238, 0, 8)
+		Position = UDim2.new(1, -270, 0, 8)
 	})
 
 	local PingLabel = Create("TextLabel", {
@@ -674,21 +671,21 @@ function OrionLib:MakeWindow(WindowConfig)
 		TextSize = 11,
 		Font = Enum.Font.GothamBold,
 		BackgroundTransparency = 1,
-		TextXAlignment = Enum.TextXAlignment.Left,
+		TextXAlignment = Enum.TextXAlignment.Center,
 		Size = UDim2.new(0, 70, 0, 14),
-		Position = UDim2.new(1, -238, 0, 24)
+		Position = UDim2.new(1, -270, 0, 24)
 	})
 
 	local ExploitLabel = Create("TextLabel", {
-		Text = GetExploitName(),
+		Text = "💻 " .. GetExploitName(),
 		TextColor3 = Color3.fromRGB(255, 210, 120),  -- оранжевый
 		TextTransparency = 0,
 		TextSize = 11,
 		Font = Enum.Font.GothamBold,
 		BackgroundTransparency = 1,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Size = UDim2.new(0, 100, 0, 14),
-		Position = UDim2.new(1, -175, 0, 16)  -- правее FPS/Ping
+		TextXAlignment = Enum.TextXAlignment.Center,
+		Size = UDim2.new(0, 90, 0, 14),
+		Position = UDim2.new(1, -202, 0, 16)  -- по центру между FPS/Ping
 	})
 
 	-- Разделитель между статами и кнопками
@@ -700,11 +697,11 @@ function OrionLib:MakeWindow(WindowConfig)
 	})
 
 	-- ══════════════════════════════════════════
-	-- ИЗМЕНЕНО: Фоновая подложка под статами (шире и правее)
+	-- ИЗМЕНЕНО: Фоновая подложка под статами
 	-- ══════════════════════════════════════════
 	local StatsBackground = Create("Frame", {
-		Size = UDim2.new(0, 200, 0, 38),
-		Position = UDim2.new(1, -248, 0, 6),
+		Size = UDim2.new(0, 175, 0, 38),
+		Position = UDim2.new(1, -278, 0, 6),
 		BackgroundColor3 = Color3.fromRGB(20, 20, 20),
 		BackgroundTransparency = 0.4,
 		BorderSizePixel = 0
@@ -715,97 +712,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			Thickness = 1
 		})
 	})
-
-	-- ══════════════════════════════════════════
-	-- ДОБАВЛЕНО: Кнопка иконки профиля (кликабельная)
-	-- ══════════════════════════════════════════
-	local ProfileIconId = "rbxassetid://0"  -- Сюда вставь свой asset id
-	local ProfileBtn = Create("ImageButton", {
-		Image = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. LocalPlayer.UserId .. "&width=420&height=420&format=png",
-		BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-		BackgroundTransparency = 0,
-		BorderSizePixel = 0,
-		Size = UDim2.new(0, 32, 0, 32),
-		Position = UDim2.new(1, -258, 0.5, -16),
-		-- Активируется при нажатии — открывает диалог смены иконки
-	}, {
-		Create("UICorner", { CornerRadius = UDim.new(1, 0) }),
-		Create("UIStroke", { Color = Color3.fromRGB(100, 100, 100), Thickness = 1.5 })
-	})
-
-	-- Диалог смены иконки
-	local ProfileDialog = Create("Frame", {
-		Size = UDim2.new(0, 220, 0, 80),
-		Position = UDim2.new(1, -260, 0, 55),
-		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-		BorderSizePixel = 0,
-		Visible = false,
-		ZIndex = 10
-	}, {
-		Create("UICorner", { CornerRadius = UDim.new(0, 8) }),
-		Create("UIStroke", { Color = Color3.fromRGB(80, 80, 80), Thickness = 1 })
-	})
-
-	local DialogLabel = Create("TextLabel", {
-		Text = "Asset ID иконки:",
-		TextColor3 = Color3.fromRGB(200, 200, 200),
-		TextSize = 12,
-		Font = Enum.Font.Gotham,
-		BackgroundTransparency = 1,
-		Size = UDim2.new(1, -10, 0, 18),
-		Position = UDim2.new(0, 8, 0, 6),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		ZIndex = 11,
-		Parent = ProfileDialog
-	})
-
-	local DialogInput = Create("TextBox", {
-		Text = "",
-		PlaceholderText = "rbxassetid://...",
-		TextColor3 = Color3.fromRGB(240, 240, 240),
-		PlaceholderColor3 = Color3.fromRGB(120, 120, 120),
-		TextSize = 12,
-		Font = Enum.Font.Gotham,
-		BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, -16, 0, 24),
-		Position = UDim2.new(0, 8, 0, 28),
-		ClearTextOnFocus = false,
-		ZIndex = 11,
-		Parent = ProfileDialog
-	}, {
-		Create("UICorner", { CornerRadius = UDim.new(0, 5) })
-	})
-
-	local DialogApply = Create("TextButton", {
-		Text = "Применить",
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextSize = 12,
-		Font = Enum.Font.GothamBold,
-		BackgroundColor3 = Color3.fromRGB(60, 120, 60),
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, -16, 0, 20),
-		Position = UDim2.new(0, 8, 0, 56),
-		ZIndex = 11,
-		Parent = ProfileDialog
-	}, {
-		Create("UICorner", { CornerRadius = UDim.new(0, 5) })
-	})
-
-	DialogApply.MouseButton1Click:Connect(function()
-		local id = DialogInput.Text
-		if id ~= "" then
-			if not id:match("^rbxassetid://") then
-				id = "rbxassetid://" .. id
-			end
-			ProfileBtn.Image = id
-		end
-		ProfileDialog.Visible = false
-	end)
-
-	ProfileBtn.MouseButton1Click:Connect(function()
-		ProfileDialog.Visible = not ProfileDialog.Visible
-	end)
 
 	-- ══════════════════════════════════════════
 	-- ИЗМЕНЕНО: Основное окно — прозрачность 0.12
@@ -831,8 +737,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			PingLabel,
 			ExploitLabel,
 			StatsDivider,
-			ProfileBtn,
-			ProfileDialog,
 			AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 7), {
 				Size = UDim2.new(0, 70, 0, 30),
 				Position = UDim2.new(1, -90, 0, 10)
